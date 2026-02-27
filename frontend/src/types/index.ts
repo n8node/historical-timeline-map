@@ -59,6 +59,13 @@ export interface Era {
   color: string;
 }
 
+export interface PersonYearRange {
+  name: string;
+  birth_year: number;
+  death_year: number;
+  era: string | null;
+}
+
 export interface EraCount {
   era: string;
   count: number;

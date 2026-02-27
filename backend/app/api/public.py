@@ -7,7 +7,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models.person import Person
-from app.schemas import PersonResponse, PersonMapResponse, EraResponse
+from app.schemas import PersonResponse, PersonMapResponse, PersonYearRangeResponse, EraResponse
 
 router = APIRouter()
 
@@ -59,3 +59,14 @@ async def get_person_detail(person_id: UUID, db: AsyncSession = Depends(get_db))
 async def get_eras():
     """Return list of historical eras for timeline markers."""
     return ERAS
+
+
+@router.get("/timeline/person-markers", response_model=list[PersonYearRangeResponse])
+async def get_person_markers(db: AsyncSession = Depends(get_db)):
+    """Return birth/death year ranges for all published persons (for timeline heat indicators)."""
+    result = await db.execute(
+        select(Person)
+        .where(Person.is_published == True)
+        .order_by(Person.birth_year)
+    )
+    return result.scalars().all()

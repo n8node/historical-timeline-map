@@ -3,18 +3,20 @@ import MapView from '../components/Map/MapView';
 import TimelineSlider from '../components/Timeline/TimelineSlider';
 import PersonCard from '../components/PersonCard/PersonCard';
 import Header from '../components/Layout/Header';
-import { getPersonsByYear, getEras } from '../services/api';
-import type { PersonMap, Era } from '../types';
+import { getPersonsByYear, getEras, getPersonMarkers } from '../services/api';
+import type { PersonMap, Era, PersonYearRange } from '../types';
 
 const HomePage: React.FC = () => {
   const [year, setYear] = useState(1800);
   const [persons, setPersons] = useState<PersonMap[]>([]);
   const [eras, setEras] = useState<Era[]>([]);
+  const [personMarkers, setPersonMarkers] = useState<PersonYearRange[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     getEras().then(setEras).catch(() => {});
+    getPersonMarkers().then(setPersonMarkers).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -63,6 +65,7 @@ const HomePage: React.FC = () => {
         year={year}
         onYearChange={handleYearChange}
         eras={eras}
+        personMarkers={personMarkers}
       />
       <PersonCard personId={selectedPersonId} onClose={handleCloseCard} />
     </div>

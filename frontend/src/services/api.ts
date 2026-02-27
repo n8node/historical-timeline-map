@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type {
-  PersonMap, Person, PersonListResponse, Era, Stats, TokenResponse,
+  PersonMap, Person, PersonListResponse, Era, PersonYearRange, Stats, TokenResponse,
 } from '../types';
 
 const API_BASE = process.env.REACT_APP_API_URL || '/api';
@@ -38,6 +38,9 @@ export const getPersonDetail = (id: string) =>
 
 export const getEras = () =>
   api.get<Era[]>('/timeline/eras').then((r) => r.data);
+
+export const getPersonMarkers = () =>
+  api.get<PersonYearRange[]>('/timeline/person-markers').then((r) => r.data);
 
 // ── Auth ──
 

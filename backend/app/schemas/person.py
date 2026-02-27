@@ -113,3 +113,13 @@ class PersonMapResponse(BaseModel):
     category: Optional[str] = None
 
     model_config = {"from_attributes": True}
+
+
+class PersonYearRangeResponse(BaseModel):
+    """Minimal birth/death years for timeline visualization."""
+    name: str
+    birth_year: int
+    death_year: int
+    era: Optional[str] = None
+
+    model_config = {"from_attributes": True}
