@@ -4,6 +4,7 @@ import type { PersonYearRange } from '../../types';
 interface ContemporariesPanelProps {
   year: number;
   personMarkers: PersonYearRange[];
+  onPersonClick: (id: string) => void;
 }
 
 const ADULT_AGE = 20;
@@ -12,6 +13,7 @@ const formatYr = (y: number): string =>
   y < 0 ? `${Math.abs(y)} до н.э.` : `${y}`;
 
 interface AdultPerson {
+  id: string;
   name: string;
   birthYear: number;
   deathYear: number;
@@ -22,13 +24,14 @@ interface AdultPerson {
 }
 
 interface Contemporary {
+  id: string;
   name: string;
   from: number;
   to: number;
   duration: number;
 }
 
-const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personMarkers }) => {
+const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personMarkers, onPersonClick }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
@@ -49,6 +52,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
           const to = Math.min(p.death_year, other.death_year);
           if (from < to) {
             contList.push({
+              id: other.id,
               name: other.name,
               from,
               to,
@@ -60,6 +64,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
         contList.sort((a, b) => b.duration - a.duration);
 
         return {
+          id: p.id,
           name: p.name,
           birthYear: p.birth_year,
           deathYear: p.death_year,
@@ -137,7 +142,10 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                     </span>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-baseline justify-between gap-2">
-                        <span className="text-[13px] font-semibold text-white truncate">{person.name}</span>
+                        <span
+                          className="text-[13px] font-semibold text-white truncate cursor-pointer hover:text-accent transition-colors"
+                          onClick={(e) => { e.stopPropagation(); onPersonClick(person.id); }}
+                        >{person.name}</span>
                         <span className="text-[11px] text-white/40 font-mono shrink-0">{person.age} лет</span>
                       </div>
                       <div className="text-[10px] text-white/30 mt-0.5">
@@ -159,7 +167,10 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                             key={ci}
                             className="flex items-baseline justify-between text-[11px] gap-2 py-0.5"
                           >
-                            <span className="text-white/70 truncate">{c.name}</span>
+                            <span
+                              className="text-white/70 truncate cursor-pointer hover:text-accent transition-colors"
+                              onClick={() => onPersonClick(c.id)}
+                            >{c.name}</span>
                             <span className="text-white/30 font-mono shrink-0 text-[10px]">
                               {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'} общения ({formatYr(c.from)}–{formatYr(c.to)})
                             </span>

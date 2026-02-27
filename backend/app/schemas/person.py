@@ -117,6 +117,7 @@ class PersonMapResponse(BaseModel):
 
 class PersonYearRangeResponse(BaseModel):
     """Minimal birth/death years for timeline visualization."""
+    id: UUID
     name: str
     birth_year: int
     death_year: int

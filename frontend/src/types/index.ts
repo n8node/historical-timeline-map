@@ -60,6 +60,7 @@ export interface Era {
 }
 
 export interface PersonYearRange {
+  id: string;
   name: string;
   birth_year: number;
   death_year: number;

@@ -68,7 +68,7 @@ const HomePage: React.FC = () => {
         eras={eras}
         personMarkers={personMarkers}
       />
-      <ContemporariesPanel year={year} personMarkers={personMarkers} />
+      <ContemporariesPanel year={year} personMarkers={personMarkers} onPersonClick={handlePersonClick} />
       <PersonCard personId={selectedPersonId} onClose={handleCloseCard} />
     </div>
   );
