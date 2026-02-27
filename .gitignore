@@ -28,6 +28,9 @@ Thumbs.db
 # Docker
 postgres_data/
 
+# SSL certificates
+certbot/
+
 # Build
 frontend/build/
 frontend/dist/
