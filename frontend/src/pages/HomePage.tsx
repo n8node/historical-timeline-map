@@ -14,6 +14,7 @@ const HomePage: React.FC = () => {
   const [personMarkers, setPersonMarkers] = useState<PersonYearRange[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [lightMap, setLightMap] = useState(true);
 
   useEffect(() => {
     getEras().then(setEras).catch(() => {});
@@ -56,11 +57,12 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <Header personCount={persons.length} />
+      <Header personCount={persons.length} lightMap={lightMap} />
       <MapView
         persons={persons}
         onPersonClick={handlePersonClick}
         isLoading={loading}
+        onStyleChange={setLightMap}
       />
       <TimelineSlider
         year={year}
@@ -68,7 +70,7 @@ const HomePage: React.FC = () => {
         eras={eras}
         personMarkers={personMarkers}
       />
-      <ContemporariesPanel year={year} personMarkers={personMarkers} onPersonClick={handlePersonClick} />
+      <ContemporariesPanel year={year} personMarkers={personMarkers} onPersonClick={handlePersonClick} lightMap={lightMap} />
       <PersonCard personId={selectedPersonId} onClose={handleCloseCard} personMarkers={personMarkers} onPersonClick={handlePersonClick} year={year} />
     </div>
   );

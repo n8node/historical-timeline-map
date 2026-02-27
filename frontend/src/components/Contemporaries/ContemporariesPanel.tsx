@@ -5,6 +5,7 @@ interface ContemporariesPanelProps {
   year: number;
   personMarkers: PersonYearRange[];
   onPersonClick: (id: string) => void;
+  lightMap?: boolean;
 }
 
 const ADULT_AGE = 20;
@@ -31,7 +32,7 @@ interface Contemporary {
   duration: number;
 }
 
-const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personMarkers, onPersonClick }) => {
+const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personMarkers, onPersonClick, lightMap = false }) => {
   const [isOpen, setIsOpen] = useState(true);
   const [expandedIdx, setExpandedIdx] = useState<number | null>(null);
 
@@ -86,7 +87,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
     return (
       <button
         onClick={() => setIsOpen(true)}
-        className="absolute top-20 left-4 z-[1000] glass-panel px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.12] transition-all pointer-events-auto flex items-center gap-2"
+        className={`absolute top-20 left-4 z-[1000] ${lightMap ? 'glass-panel-dark' : 'glass-panel'} px-3 py-2.5 text-sm text-white/70 hover:text-white hover:bg-white/[0.12] transition-all pointer-events-auto flex items-center gap-2`}
         title="Показать современников"
       >
         <span className="text-base">👥</span>
@@ -97,7 +98,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
 
   return (
     <div className="absolute top-20 left-4 z-[1000] pointer-events-auto flex flex-col" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-      <div className="glass-panel-solid shadow-2xl flex flex-col overflow-hidden" style={{ width: '320px', maxHeight: '100%' }}>
+      <div className={`${lightMap ? 'glass-panel-dark-solid' : 'glass-panel-solid'} shadow-2xl flex flex-col overflow-hidden`} style={{ width: '320px', maxHeight: '100%' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">

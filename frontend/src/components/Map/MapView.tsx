@@ -7,6 +7,7 @@ interface MapViewProps {
   persons: PersonMap[];
   onPersonClick: (id: string) => void;
   isLoading: boolean;
+  onStyleChange?: (isDark: boolean) => void;
 }
 
 const ERA_COLORS: Record<string, string> = {
@@ -99,13 +100,14 @@ const TILE_STYLES: TileStyle[] = [
   },
 ];
 
-const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) => {
+const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading, onStyleChange }) => {
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
   const tileRef = useRef<L.TileLayer | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [styleIdx, setStyleIdx] = useState(0);
+  const [styleIdx, setStyleIdx] = useState(1);
   const [pickerOpen, setPickerOpen] = useState(false);
+  const isDark = TILE_STYLES[styleIdx].dark;
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -119,7 +121,7 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
       attributionControl: true,
     });
 
-    const style = TILE_STYLES[0];
+    const style = TILE_STYLES[1];
     const tile = L.tileLayer(style.url, {
       attribution: style.attr,
       subdomains: style.subdomains || 'abc',
@@ -127,6 +129,7 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
 
     tileRef.current = tile;
     mapRef.current = map;
+    onStyleChange?.(!style.dark);
 
     return () => {
       map.remove();
@@ -151,7 +154,8 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
     }).addTo(map);
 
     tileRef.current = tile;
-  }, [styleIdx]);
+    onStyleChange?.(!style.dark);
+  }, [styleIdx, onStyleChange]);
 
   const handlePersonClick = useCallback(
     (id: string) => onPersonClick(id),
@@ -219,7 +223,7 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
       <div ref={containerRef} className="absolute inset-0 z-0" />
 
       {isLoading && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] glass-panel px-4 py-2 text-sm text-white/70">
+        <div className={`absolute top-4 left-1/2 -translate-x-1/2 z-[1000] ${isDark ? 'glass-panel' : 'glass-panel-dark'} px-4 py-2 text-sm text-white/70`}>
           Загрузка...
         </div>
       )}
@@ -228,7 +232,7 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
       <div className="absolute top-20 right-4 z-[1000] pointer-events-auto">
         <button
           onClick={() => setPickerOpen(!pickerOpen)}
-          className="glass-panel px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.12] transition-all flex items-center gap-2"
+          className={`${isDark ? 'glass-panel' : 'glass-panel-dark'} px-3 py-2 text-sm text-white/70 hover:text-white transition-all flex items-center gap-2`}
           title="Стиль карты"
         >
           <span className="text-base">🗺</span>
@@ -236,7 +240,7 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
         </button>
 
         {pickerOpen && (
-          <div className="mt-1 glass-panel-solid shadow-2xl overflow-hidden" style={{ minWidth: '160px' }}>
+          <div className={`mt-1 ${isDark ? 'glass-panel-solid' : 'glass-panel-dark-solid'} shadow-2xl overflow-hidden`} style={{ minWidth: '160px' }}>
             {TILE_STYLES.map((s, i) => (
               <button
                 key={s.name}
