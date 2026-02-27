@@ -31,6 +31,7 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [isDraggingZoom, setIsDraggingZoom] = useState(false);
+  const [zoomCenter, setZoomCenter] = useState(year);
   const [inputValue, setInputValue] = useState('');
   const [showInput, setShowInput] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
@@ -73,8 +74,12 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
 
   const showZoom = aliveAtYear >= ZOOM_THRESHOLD;
 
-  const zoomMin = useMemo(() => clampYear(year - ZOOM_HALF_SPAN), [year, clampYear]);
-  const zoomMax = useMemo(() => clampYear(year + ZOOM_HALF_SPAN), [year, clampYear]);
+  useEffect(() => {
+    if (!isDraggingZoom) setZoomCenter(year);
+  }, [year, isDraggingZoom]);
+
+  const zoomMin = useMemo(() => clampYear(zoomCenter - ZOOM_HALF_SPAN), [zoomCenter, clampYear]);
+  const zoomMax = useMemo(() => clampYear(zoomCenter + ZOOM_HALF_SPAN), [zoomCenter, clampYear]);
   const zoomRange = zoomMax - zoomMin || 1;
 
   const zoomYearToPercent = useCallback(
@@ -87,14 +92,13 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
     [zoomMin, zoomRange]
   );
 
-  const zoomPersonBands = useMemo(() => {
+  const zoomPersonTicks = useMemo(() => {
     if (!showZoom) return [];
     return personMarkers
-      .filter((p) => p.death_year >= zoomMin && p.birth_year <= zoomMax)
+      .filter((p) => p.birth_year >= zoomMin && p.birth_year <= zoomMax)
       .map((p) => ({
         name: p.name,
-        left: zoomYearToPercent(Math.max(p.birth_year, zoomMin)),
-        width: Math.max(0.4, zoomYearToPercent(Math.min(p.death_year, zoomMax)) - zoomYearToPercent(Math.max(p.birth_year, zoomMin))),
+        left: zoomYearToPercent(p.birth_year),
       }));
   }, [showZoom, personMarkers, zoomMin, zoomMax, zoomYearToPercent]);
 
@@ -452,19 +456,19 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
             onMouseDown={handleZoomMouseDown}
             onTouchStart={handleZoomTouchStart}
           >
-            {/* Zoom person bands */}
-            {zoomPersonBands.map((band, i) => (
+            {/* Zoom person birth ticks */}
+            {zoomPersonTicks.map((tick, i) => (
               <div
                 key={i}
-                className="absolute top-0 h-full rounded-sm pointer-events-none"
+                className="absolute top-0 h-full pointer-events-none"
                 style={{
-                  left: `${band.left}%`,
-                  width: `${band.width}%`,
-                  minWidth: '2px',
-                  background: 'rgba(255,255,255,0.55)',
-                  boxShadow: '0 0 4px rgba(255,255,255,0.25)',
+                  left: `${tick.left}%`,
+                  width: '3px',
+                  background: 'rgba(255,255,255,0.7)',
+                  borderRadius: '1px',
+                  boxShadow: '0 0 3px rgba(255,255,255,0.3)',
                 }}
-                title={band.name}
+                title={tick.name}
               />
             ))}
 
