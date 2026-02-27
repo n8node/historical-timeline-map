@@ -47,6 +47,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
 
         for (const other of personMarkers) {
           if (other === p) continue;
+          if (other.birth_year + ADULT_AGE > year || other.death_year < year) continue;
           const otherAdultFrom = other.birth_year + ADULT_AGE;
           const from = Math.max(adultFrom, otherAdultFrom);
           const to = Math.min(p.death_year, other.death_year);

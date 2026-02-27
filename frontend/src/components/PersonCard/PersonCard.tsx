@@ -73,6 +73,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
 
     for (const other of personMarkers) {
       if (other.id === person.id) continue;
+      if (other.birth_year + ADULT_AGE > year || other.death_year < year) continue;
       const otherAdultFrom = other.birth_year + ADULT_AGE;
       const from = Math.max(adultFrom, otherAdultFrom);
       const to = Math.min(person.death_year, other.death_year);
@@ -90,7 +91,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
 
     result.sort((a, b) => b.duration - a.duration);
     return result;
-  }, [person, personMarkers]);
+  }, [person, personMarkers, year]);
 
   if (!personId) return null;
 
