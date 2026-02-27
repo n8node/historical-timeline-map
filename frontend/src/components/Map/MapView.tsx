@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import L from 'leaflet';
 import 'leaflet.markercluster';
 import type { PersonMap } from '../../types';
@@ -50,13 +50,62 @@ const createMarkerIcon = (person: PersonMap) => {
   });
 };
 
-const DARK_TILE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
-const DARK_TILE_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
+interface TileStyle {
+  name: string;
+  url: string;
+  attr: string;
+  subdomains?: string;
+  dark: boolean;
+}
+
+const CARTO_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>';
+const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
+const TILE_STYLES: TileStyle[] = [
+  {
+    name: 'Тёмная',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    attr: CARTO_ATTR,
+    subdomains: 'abcd',
+    dark: true,
+  },
+  {
+    name: 'Voyager',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attr: CARTO_ATTR,
+    subdomains: 'abcd',
+    dark: false,
+  },
+  {
+    name: 'Светлая',
+    url: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    attr: CARTO_ATTR,
+    subdomains: 'abcd',
+    dark: false,
+  },
+  {
+    name: 'OSM',
+    url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+    attr: OSM_ATTR,
+    subdomains: 'abc',
+    dark: false,
+  },
+  {
+    name: 'Без подписей',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+    attr: CARTO_ATTR,
+    subdomains: 'abcd',
+    dark: true,
+  },
+];
 
 const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) => {
   const mapRef = useRef<L.Map | null>(null);
   const clusterRef = useRef<L.MarkerClusterGroup | null>(null);
+  const tileRef = useRef<L.TileLayer | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [styleIdx, setStyleIdx] = useState(0);
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -70,15 +119,39 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
       attributionControl: true,
     });
 
-    L.tileLayer(DARK_TILE_URL, { attribution: DARK_TILE_ATTR, subdomains: 'abcd' }).addTo(map);
+    const style = TILE_STYLES[0];
+    const tile = L.tileLayer(style.url, {
+      attribution: style.attr,
+      subdomains: style.subdomains || 'abc',
+    }).addTo(map);
 
+    tileRef.current = tile;
     mapRef.current = map;
 
     return () => {
       map.remove();
       mapRef.current = null;
+      tileRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+
+    const style = TILE_STYLES[styleIdx];
+
+    if (tileRef.current) {
+      map.removeLayer(tileRef.current);
+    }
+
+    const tile = L.tileLayer(style.url, {
+      attribution: style.attr,
+      subdomains: style.subdomains || 'abc',
+    }).addTo(map);
+
+    tileRef.current = tile;
+  }, [styleIdx]);
 
   const handlePersonClick = useCallback(
     (id: string) => onPersonClick(id),
@@ -144,11 +217,47 @@ const MapView: React.FC<MapViewProps> = ({ persons, onPersonClick, isLoading }) 
   return (
     <div className="relative w-full h-full">
       <div ref={containerRef} className="absolute inset-0 z-0" />
+
       {isLoading && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] glass-panel px-4 py-2 text-sm text-white/70">
           Загрузка...
         </div>
       )}
+
+      {/* Map style switcher */}
+      <div className="absolute top-20 right-4 z-[1000] pointer-events-auto">
+        <button
+          onClick={() => setPickerOpen(!pickerOpen)}
+          className="glass-panel px-3 py-2 text-sm text-white/70 hover:text-white hover:bg-white/[0.12] transition-all flex items-center gap-2"
+          title="Стиль карты"
+        >
+          <span className="text-base">🗺</span>
+          <span className="hidden sm:inline">{TILE_STYLES[styleIdx].name}</span>
+        </button>
+
+        {pickerOpen && (
+          <div className="mt-1 glass-panel-solid shadow-2xl overflow-hidden" style={{ minWidth: '160px' }}>
+            {TILE_STYLES.map((s, i) => (
+              <button
+                key={s.name}
+                onClick={() => { setStyleIdx(i); setPickerOpen(false); }}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center gap-2 ${
+                  i === styleIdx
+                    ? 'bg-accent/20 text-accent'
+                    : 'text-white/70 hover:bg-white/[0.08] hover:text-white'
+                }`}
+              >
+                <span className="w-3 h-3 rounded-full shrink-0" style={{
+                  background: s.dark ? '#1a1a2e' : '#e8e4df',
+                  border: `2px solid ${i === styleIdx ? '#e94560' : 'rgba(255,255,255,0.2)'}`,
+                }} />
+                {s.name}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       <style>{`
         .glass-tooltip {
           background: rgba(22, 33, 62, 0.92) !important;
