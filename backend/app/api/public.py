@@ -23,7 +23,7 @@ ERAS = [
 
 @router.get("/persons", response_model=list[PersonMapResponse])
 async def get_persons_by_year(
-    year: int = Query(..., ge=-5000, le=2026, description="Year to filter persons"),
+    year: int = Query(..., ge=-10000, le=2100, description="Year to filter persons"),
     db: AsyncSession = Depends(get_db),
 ):
     """Return all published persons alive in the given year (lightweight for map markers)."""

@@ -6,14 +6,17 @@ interface TimelineSliderProps {
   onYearChange: (year: number) => void;
   eras: Era[];
   personMarkers: PersonYearRange[];
-  minYear?: number;
-  maxYear?: number;
 }
 
 const formatYear = (year: number): string => {
   if (year < 0) return `${Math.abs(year)} до н.э.`;
   if (year === 0) return '1 н.э.';
   return `${year} н.э.`;
+};
+
+const formatYearShort = (year: number): string => {
+  if (year < 0) return `${Math.abs(year)}`;
+  return `${year}`;
 };
 
 const STEP_SIZES = [1, 10, 100] as const;
@@ -23,17 +26,25 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
   onYearChange,
   eras,
   personMarkers,
-  minYear = -5000,
-  maxYear = 2026,
 }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [showInput, setShowInput] = useState(false);
   const trackRef = useRef<HTMLDivElement>(null);
+
+  const minYear = useMemo(() => {
+    const candidates: number[] = [];
+    if (personMarkers.length) candidates.push(Math.min(...personMarkers.map((p) => p.birth_year)));
+    if (eras.length) candidates.push(Math.min(...eras.map((e) => e.start_year)));
+    if (!candidates.length) return -3200;
+    return Math.min(...candidates) - 100;
+  }, [personMarkers, eras]);
+
+  const maxYear = 2026;
   const range = maxYear - minYear;
 
   const yearToPercent = useCallback(
-    (y: number) => ((y - minYear) / range) * 100,
+    (y: number) => Math.max(0, Math.min(100, ((y - minYear) / range) * 100)),
     [minYear, range]
   );
 
@@ -44,7 +55,7 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
 
   const clampYear = useCallback(
     (y: number) => Math.max(minYear, Math.min(maxYear, y)),
-    [minYear, maxYear]
+    [minYear]
   );
 
   const getYearFromEvent = useCallback(
@@ -75,19 +86,15 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
 
   useEffect(() => {
     if (!isDragging) return;
-
     const handleMove = (e: MouseEvent | TouchEvent) => {
       const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
       onYearChange(getYearFromEvent(clientX));
     };
-
     const handleUp = () => setIsDragging(false);
-
     window.addEventListener('mousemove', handleMove);
     window.addEventListener('mouseup', handleUp);
     window.addEventListener('touchmove', handleMove);
     window.addEventListener('touchend', handleUp);
-
     return () => {
       window.removeEventListener('mousemove', handleMove);
       window.removeEventListener('mouseup', handleUp);
@@ -105,19 +112,24 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
   };
 
   const handleStep = useCallback(
-    (delta: number) => {
-      onYearChange(clampYear(year + delta));
-    },
+    (delta: number) => onYearChange(clampYear(year + delta)),
     [year, onYearChange, clampYear]
   );
 
   const handleEraClick = useCallback(
-    (era: Era) => {
-      const mid = Math.round((era.start_year + era.end_year) / 2);
-      onYearChange(clampYear(mid));
-    },
+    (era: Era) => onYearChange(clampYear(Math.round((era.start_year + era.end_year) / 2))),
     [onYearChange, clampYear]
   );
+
+  const eraPersonCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const era of eras) {
+      counts[era.name] = personMarkers.filter(
+        (p) => p.birth_year >= era.start_year && p.birth_year <= era.end_year
+      ).length;
+    }
+    return counts;
+  }, [eras, personMarkers]);
 
   const personBands = useMemo(() => {
     if (!personMarkers.length) return [];
@@ -125,7 +137,6 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
       name: p.name,
       left: yearToPercent(p.birth_year),
       width: Math.max(0.3, yearToPercent(p.death_year) - yearToPercent(p.birth_year)),
-      era: p.era,
     }));
   }, [personMarkers, yearToPercent]);
 
@@ -135,14 +146,20 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
     for (const e of eras) {
       if (year >= e.start_year && year <= e.end_year) {
         const span = e.end_year - e.start_year;
-        if (span < bestSpan) {
-          best = e;
-          bestSpan = span;
-        }
+        if (span < bestSpan) { best = e; bestSpan = span; }
       }
     }
     return best;
   }, [eras, year]);
+
+  const eraBoundaryYears = useMemo(() => {
+    const yearSet = new Set<number>();
+    for (const e of eras) {
+      yearSet.add(e.start_year);
+      yearSet.add(e.end_year);
+    }
+    return Array.from(yearSet).sort((a, b) => a - b);
+  }, [eras]);
 
   const currentPercent = yearToPercent(year);
 
@@ -150,32 +167,7 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
     <div className="absolute bottom-0 left-0 right-0 z-[1000]">
       <div className="glass-panel-solid mx-4 mb-4 px-6 py-4 shadow-2xl">
 
-        {/* Row 1: Era quick-jump buttons */}
-        <div className="flex items-center gap-1.5 mb-3 flex-wrap">
-          <span className="text-white/40 text-[10px] uppercase tracking-wider mr-1 shrink-0">
-            Эпохи:
-          </span>
-          {eras.map((era) => {
-            const isActive = currentEra?.name === era.name;
-            return (
-              <button
-                key={era.name}
-                onClick={() => handleEraClick(era)}
-                className="px-2.5 py-1 rounded-full text-[11px] font-medium transition-all whitespace-nowrap"
-                style={{
-                  background: isActive ? era.color : 'rgba(255,255,255,0.06)',
-                  color: isActive ? '#fff' : era.color,
-                  border: `1px solid ${isActive ? era.color : 'rgba(255,255,255,0.1)'}`,
-                  boxShadow: isActive ? `0 0 12px ${era.color}50` : 'none',
-                }}
-              >
-                {era.name}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Row 2: Step buttons + Year display + Step buttons */}
+        {/* Row 1: Step buttons + Year display + Step buttons */}
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-1">
             {[...STEP_SIZES].reverse().map((step) => (
@@ -183,7 +175,6 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
                 key={`minus-${step}`}
                 onClick={() => handleStep(-step)}
                 className="px-2 py-1 rounded text-[11px] font-mono text-white/60 bg-white/5 hover:bg-white/15 hover:text-white border border-white/10 transition-all"
-                title={`−${step} ${step === 1 ? 'год' : step < 5 ? 'года' : 'лет'}`}
               >
                 −{step}
               </button>
@@ -206,16 +197,8 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
                   min={minYear}
                   max={maxYear}
                 />
-                <button type="submit" className="text-accent text-sm hover:text-accent/80">
-                  OK
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowInput(false)}
-                  className="text-white/50 text-sm hover:text-white/80"
-                >
-                  X
-                </button>
+                <button type="submit" className="text-accent text-sm hover:text-accent/80">OK</button>
+                <button type="button" onClick={() => setShowInput(false)} className="text-white/50 text-sm hover:text-white/80">X</button>
               </form>
             ) : (
               <button
@@ -234,7 +217,6 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
                 key={`plus-${step}`}
                 onClick={() => handleStep(step)}
                 className="px-2 py-1 rounded text-[11px] font-mono text-white/60 bg-white/5 hover:bg-white/15 hover:text-white border border-white/10 transition-all"
-                title={`+${step} ${step === 1 ? 'год' : step < 5 ? 'года' : 'лет'}`}
               >
                 +{step}
               </button>
@@ -242,33 +224,50 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
           </div>
         </div>
 
-        {/* Row 3: Era labels above the track */}
-        <div className="relative h-5 mb-1">
+        {/* Row 2: Era blocks above the track — name + person count, clickable */}
+        <div className="relative h-10 mb-0.5">
           {eras.map((era) => {
-            const left = yearToPercent(era.start_year);
-            const width = yearToPercent(era.end_year) - left;
-            if (width <= 0) return null;
+            const leftPct = yearToPercent(era.start_year);
+            const rightPct = yearToPercent(era.end_year);
+            const widthPct = rightPct - leftPct;
+            if (widthPct <= 0) return null;
+            const isActive = currentEra?.name === era.name;
+            const count = eraPersonCounts[era.name] || 0;
+
             return (
-              <div
+              <button
                 key={era.name}
-                className="absolute top-0 h-full flex items-center justify-center overflow-hidden"
-                style={{ left: `${Math.max(0, left)}%`, width: `${Math.min(100 - left, width)}%` }}
+                onClick={() => handleEraClick(era)}
+                className="absolute top-0 h-full flex flex-col items-center justify-center overflow-hidden rounded-t transition-all"
+                style={{
+                  left: `${leftPct}%`,
+                  width: `${widthPct}%`,
+                  background: isActive ? `${era.color}30` : `${era.color}15`,
+                  borderBottom: `2px solid ${era.color}`,
+                  borderLeft: '1px solid rgba(255,255,255,0.08)',
+                }}
               >
                 <span
-                  className="text-[10px] font-medium whitespace-nowrap px-1"
-                  style={{ color: era.color, opacity: 0.7 }}
+                  className="text-[10px] font-semibold leading-tight whitespace-nowrap px-0.5 truncate w-full text-center"
+                  style={{ color: isActive ? '#fff' : era.color }}
                 >
                   {era.name}
                 </span>
-              </div>
+                <span
+                  className="text-[9px] font-mono leading-tight"
+                  style={{ color: isActive ? '#fff' : `${era.color}bb` }}
+                >
+                  {count}
+                </span>
+              </button>
             );
           })}
         </div>
 
-        {/* Row 4: Track with person bands */}
+        {/* Row 3: Track with person bands */}
         <div
           ref={trackRef}
-          className="relative h-3 rounded-full cursor-pointer select-none"
+          className="relative h-3 cursor-pointer select-none"
           style={{
             background: eras.length
               ? `linear-gradient(to right, ${eras.map((e) => `${e.color} ${yearToPercent(e.start_year)}%, ${e.color} ${yearToPercent(e.end_year)}%`).join(', ')})`
@@ -277,26 +276,24 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
-          {/* Person life-span bands */}
           {personBands.map((band, i) => (
             <div
               key={i}
-              className="absolute top-0 h-full rounded-full pointer-events-none"
+              className="absolute top-0 h-full pointer-events-none"
               style={{
                 left: `${band.left}%`,
                 width: `${band.width}%`,
-                minWidth: '3px',
-                background: 'rgba(255, 255, 255, 0.45)',
-                boxShadow: '0 0 4px rgba(255,255,255,0.3)',
+                minWidth: '2px',
+                background: 'rgba(255, 255, 255, 0.5)',
+                boxShadow: '0 0 3px rgba(255,255,255,0.3)',
               }}
               title={band.name}
             />
           ))}
 
-          {/* Era separators */}
           {eras.map((era) => {
             const pct = yearToPercent(era.start_year);
-            if (pct <= 0 || pct >= 100) return null;
+            if (pct <= 0.5 || pct >= 99.5) return null;
             return (
               <div
                 key={`sep-${era.name}`}
@@ -306,7 +303,6 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
             );
           })}
 
-          {/* Thumb */}
           <div
             className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 z-10"
             style={{ left: `${currentPercent}%` }}
@@ -314,24 +310,32 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
             <div className="w-6 h-6 rounded-full bg-accent border-2 border-white shadow-lg shadow-accent/40 transition-transform duration-75 hover:scale-110" />
           </div>
 
-          {/* Progress overlay */}
           <div
-            className="absolute top-0 left-0 h-full rounded-full bg-white/10 pointer-events-none"
+            className="absolute top-0 left-0 h-full bg-white/10 pointer-events-none"
             style={{ width: `${currentPercent}%` }}
           />
         </div>
 
-        {/* Row 5: Scale labels — positioned at actual year locations */}
-        <div className="relative h-4 mt-2">
-          {[minYear, -3000, -2000, -1000, -500, 0, 500, 1000, 1500, maxYear].map((y) => (
-            <span
-              key={y}
-              className="absolute text-[10px] text-white/40 -translate-x-1/2 whitespace-nowrap"
-              style={{ left: `${yearToPercent(y)}%` }}
-            >
-              {y === 0 ? '0' : formatYear(y)}
-            </span>
-          ))}
+        {/* Row 4: Era boundary years below the track */}
+        <div className="relative h-5 mt-0.5">
+          {eraBoundaryYears.map((y, i) => {
+            const pct = yearToPercent(y);
+            if (pct < 0 || pct > 100) return null;
+            const isFirst = i === 0;
+            const isLast = i === eraBoundaryYears.length - 1;
+            return (
+              <span
+                key={y}
+                className="absolute text-[9px] text-white/50 whitespace-nowrap font-mono"
+                style={{
+                  left: `${pct}%`,
+                  transform: isFirst ? 'translateX(0)' : isLast ? 'translateX(-100%)' : 'translateX(-50%)',
+                }}
+              >
+                {y < 0 ? `${formatYearShort(y)} до н.э.` : `${formatYearShort(y)} н.э.`}
+              </span>
+            );
+          })}
         </div>
       </div>
     </div>
