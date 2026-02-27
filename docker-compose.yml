@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: historical_map_db
+    environment:
+      POSTGRES_DB: historical_map
+      POSTGRES_USER: ${DB_USER:-historical_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-historical_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+    networks:
+      - app_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-historical_user} -d historical_map"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./backend
+    container_name: historical_map_backend
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${DB_USER:-historical_user}:${DB_PASSWORD:-historical_pass}@postgres:5432/historical_map
+      DATABASE_URL_SYNC: postgresql://${DB_USER:-historical_user}:${DB_PASSWORD:-historical_pass}@postgres:5432/historical_map
+      SECRET_KEY: ${SECRET_KEY:-supersecretkey_change_me_in_production}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@example.com}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+    volumes:
+      - ./backend/uploads:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - app_network
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        REACT_APP_API_URL: ${API_URL:-/api}
+    container_name: historical_map_frontend
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+    networks:
+      - app_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  app_network:
+    driver: bridge
