@@ -7,7 +7,7 @@ import { getPersonsByYear, getEras } from '../services/api';
 import type { PersonMap, Era } from '../types';
 
 const HomePage: React.FC = () => {
-  const [year, setYear] = useState(1500);
+  const [year, setYear] = useState(1800);
   const [persons, setPersons] = useState<PersonMap[]>([]);
   const [eras, setEras] = useState<Era[]>([]);
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);

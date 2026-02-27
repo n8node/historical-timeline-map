@@ -13,10 +13,14 @@ from app.api import api_router
 
 
 async def create_admin_user():
-    """Create default admin user if none exists."""
+    """Create or update admin user from environment variables."""
     async with async_session() as session:
-        result = await session.execute(select(User).limit(1))
-        if result.scalar_one_or_none() is None:
+        result = await session.execute(
+            select(User).where(User.email == settings.ADMIN_EMAIL)
+        )
+        existing = result.scalar_one_or_none()
+
+        if existing is None:
             admin = User(
                 email=settings.ADMIN_EMAIL,
                 password_hash=hash_password(settings.ADMIN_PASSWORD),
@@ -26,6 +30,11 @@ async def create_admin_user():
             session.add(admin)
             await session.commit()
             print(f"Admin user created: {settings.ADMIN_EMAIL}")
+        else:
+            existing.password_hash = hash_password(settings.ADMIN_PASSWORD)
+            existing.is_active = True
+            await session.commit()
+            print(f"Admin user password updated: {settings.ADMIN_EMAIL}")
 
 
 @asynccontextmanager

@@ -19,29 +19,32 @@ const ERA_COLORS: Record<string, string> = {
 const getMarkerColor = (era: string | null): string =>
   (era && ERA_COLORS[era]) || '#e94560';
 
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return name.slice(0, 2).toUpperCase();
+};
+
 const createMarkerIcon = (person: PersonMap) => {
   const color = getMarkerColor(person.era);
-  const photoUrl = person.main_photo_url || '';
+  const initials = getInitials(person.name);
 
   return L.divIcon({
     className: '',
-    html: `
-      <div class="custom-marker" style="
-        width: 44px; height: 44px;
-        border-radius: 50%;
-        border: 3px solid ${color};
-        overflow: hidden;
-        box-shadow: 0 0 12px ${color}80;
-        background: #1a1a2e;
-        cursor: pointer;
-        transition: transform 0.2s, box-shadow 0.2s;
-      ">
-        <img src="${photoUrl}" alt="${person.name}"
-          style="width:100%;height:100%;object-fit:cover;"
-          onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\\'display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:18px;color:${color}\\'>👤</div>'"
-        />
-      </div>
-    `,
+    html: `<div style="
+      width:44px;height:44px;
+      border-radius:50%;
+      border:3px solid ${color};
+      box-shadow:0 0 12px ${color}80;
+      background:#1a1a2e;
+      cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      transition:transform 0.2s,box-shadow 0.2s;
+      font-family:Inter,sans-serif;
+      font-size:14px;font-weight:700;
+      color:${color};
+      letter-spacing:-0.5px;
+    ">${initials}</div>`,
     iconSize: [44, 44],
     iconAnchor: [22, 22],
   });
