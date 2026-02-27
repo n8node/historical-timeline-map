@@ -3,6 +3,7 @@ import MapView from '../components/Map/MapView';
 import TimelineSlider from '../components/Timeline/TimelineSlider';
 import PersonCard from '../components/PersonCard/PersonCard';
 import Header from '../components/Layout/Header';
+import ContemporariesPanel from '../components/Contemporaries/ContemporariesPanel';
 import { getPersonsByYear, getEras, getPersonMarkers } from '../services/api';
 import type { PersonMap, Era, PersonYearRange } from '../types';
 
@@ -67,6 +68,7 @@ const HomePage: React.FC = () => {
         eras={eras}
         personMarkers={personMarkers}
       />
+      <ContemporariesPanel year={year} personMarkers={personMarkers} />
       <PersonCard personId={selectedPersonId} onClose={handleCloseCard} />
     </div>
   );
