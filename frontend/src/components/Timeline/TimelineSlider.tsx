@@ -48,16 +48,74 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
   }, [personMarkers, eras]);
 
   const maxYear = 2026;
-  const range = maxYear - minYear;
+
+  // Weighted piecewise-linear scale: person-dense eras get more visual space
+  // Formula per segment: weight = 0.3 × (yearSpan / totalYears) + 0.7 × (personCount / totalPersons)
+  const segments = useMemo(() => {
+    const boundarySet = new Set<number>([minYear, maxYear]);
+    for (const e of eras) {
+      const s = Math.max(e.start_year, minYear);
+      const eEnd = Math.min(e.end_year, maxYear);
+      if (s < eEnd) { boundarySet.add(s); boundarySet.add(eEnd); }
+    }
+    const bounds = Array.from(boundarySet).sort((a, b) => a - b);
+    if (bounds.length < 2) return [];
+
+    const totalYears = maxYear - minYear || 1;
+    const totalPersons = Math.max(1, personMarkers.length);
+    const MIN_RAW = 0.012;
+
+    const raw: { start: number; end: number; yearSpan: number; weight: number }[] = [];
+    for (let i = 0; i < bounds.length - 1; i++) {
+      const start = bounds[i];
+      const end = bounds[i + 1];
+      const yearSpan = end - start;
+      const isLast = i === bounds.length - 2;
+      const count = personMarkers.filter(
+        (p) => p.birth_year >= start && (isLast ? p.birth_year <= end : p.birth_year < end)
+      ).length;
+      const w = 0.3 * (yearSpan / totalYears) + 0.7 * (count / totalPersons);
+      raw.push({ start, end, yearSpan, weight: Math.max(w, MIN_RAW) });
+    }
+
+    const totalW = raw.reduce((s, r) => s + r.weight, 0) || 1;
+    let cum = 0;
+    return raw.map((r) => {
+      const pctStart = cum;
+      cum += (r.weight / totalW) * 100;
+      return { ...r, pctStart, pctEnd: cum };
+    });
+  }, [eras, personMarkers, minYear]);
 
   const yearToPercent = useCallback(
-    (y: number) => Math.max(0, Math.min(100, ((y - minYear) / range) * 100)),
-    [minYear, range]
+    (y: number) => {
+      if (!segments.length) return ((y - minYear) / (maxYear - minYear || 1)) * 100;
+      const c = Math.max(minYear, Math.min(maxYear, y));
+      for (const seg of segments) {
+        if (c >= seg.start && c <= seg.end) {
+          const f = seg.yearSpan > 0 ? (c - seg.start) / seg.yearSpan : 0;
+          return Math.max(0, Math.min(100, seg.pctStart + f * (seg.pctEnd - seg.pctStart)));
+        }
+      }
+      return segments[segments.length - 1].pctEnd;
+    },
+    [segments, minYear]
   );
 
   const percentToYear = useCallback(
-    (pct: number) => Math.round(minYear + (pct / 100) * range),
-    [minYear, range]
+    (pct: number) => {
+      if (!segments.length) return Math.round(minYear + (pct / 100) * (maxYear - minYear));
+      const cp = Math.max(0, Math.min(100, pct));
+      for (const seg of segments) {
+        if (cp >= seg.pctStart && cp <= seg.pctEnd) {
+          const sw = seg.pctEnd - seg.pctStart;
+          const f = sw > 0 ? (cp - seg.pctStart) / sw : 0;
+          return Math.round(seg.start + f * seg.yearSpan);
+        }
+      }
+      return maxYear;
+    },
+    [segments, minYear]
   );
 
   const clampYear = useCallback(
