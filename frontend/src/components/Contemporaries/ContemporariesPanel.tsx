@@ -27,6 +27,8 @@ interface AdultPerson {
 interface Contemporary {
   id: string;
   name: string;
+  birthYear: number;
+  deathYear: number;
   from: number;
   to: number;
   duration: number;
@@ -56,6 +58,8 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
             contList.push({
               id: other.id,
               name: other.name,
+              birthYear: other.birth_year,
+              deathYear: other.death_year,
               from,
               to,
               duration: to - from,
@@ -98,7 +102,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
 
   return (
     <div className="absolute top-20 left-4 z-[1000] pointer-events-auto flex flex-col" style={{ maxHeight: 'calc(100vh - 220px)' }}>
-      <div className={`${lightMap ? 'glass-panel-dark-solid' : 'glass-panel-solid'} shadow-2xl flex flex-col overflow-hidden`} style={{ width: '320px', maxHeight: '100%' }}>
+      <div className={`${lightMap ? 'glass-panel-dark-solid' : 'glass-panel-solid'} shadow-2xl flex flex-col overflow-hidden`} style={{ width: '384px', maxHeight: '100%' }}>
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 shrink-0">
@@ -156,7 +160,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                         </span>
                       </div>
                       <div className="text-[10px] text-white/30 mt-0.5">
-                        {formatYr(person.birthYear)} — {formatYr(person.deathYear)}
+                        жизнь: {formatYr(person.birthYear)} — {formatYr(person.deathYear)}
                         <span className="mx-1">·</span>
                         <span className="text-accent/70">{person.contemporaries.length} связей</span>
                       </div>
@@ -168,19 +172,24 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                       <div className="text-[10px] text-white/40 mb-1.5 uppercase tracking-wider">
                         Мог общаться с:
                       </div>
-                      <div className="space-y-1 max-h-48 overflow-y-auto scrollbar-thin">
+                      <div className="space-y-0.5 max-h-60 overflow-y-auto scrollbar-thin">
                         {shown.map((c, ci) => (
                           <div
                             key={ci}
-                            className="flex items-baseline justify-between text-[11px] gap-2 py-0.5"
+                            className="py-1 cursor-pointer hover:bg-white/5 transition-colors px-1 rounded"
+                            onClick={() => onPersonClick(c.id)}
                           >
-                            <span
-                              className="text-white/70 truncate cursor-pointer hover:text-accent transition-colors"
-                              onClick={() => onPersonClick(c.id)}
-                            >{c.name}</span>
-                            <span className="text-white/30 font-mono shrink-0 text-[10px]">
-                              {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'} общения ({formatYr(c.from)}–{formatYr(c.to)})
-                            </span>
+                            <div className="flex items-baseline justify-between gap-2">
+                              <span className="text-[11px] text-white/70 truncate hover:text-accent transition-colors">
+                                {c.name}
+                              </span>
+                              <span className="text-[10px] text-accent/70 font-mono shrink-0">
+                                {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'}
+                              </span>
+                            </div>
+                            <div className="text-[9px] text-white/25 mt-0.5">
+                              жизнь: {formatYr(c.birthYear)} — {formatYr(c.deathYear)} · возможное общение: с {formatYr(c.from)} по {formatYr(c.to)}
+                            </div>
                           </div>
                         ))}
                       </div>

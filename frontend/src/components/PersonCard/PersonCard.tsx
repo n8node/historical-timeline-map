@@ -31,6 +31,7 @@ interface Contemporary {
   id: string;
   name: string;
   birthYear: number;
+  deathYear: number;
   from: number;
   to: number;
   duration: number;
@@ -82,6 +83,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
           id: other.id,
           name: other.name,
           birthYear: other.birth_year,
+          deathYear: other.death_year,
           from,
           to,
           duration: to - from,
@@ -252,8 +254,11 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
                           </span>
                         </span>
                       </div>
+                      <div className="text-[9px] text-white/25 mt-0.5">
+                        жизнь: {formatYr(c.birthYear)} — {formatYr(c.deathYear)}
+                      </div>
                       <div className="text-[10px] text-white/30 mt-0.5">
-                        {c.duration} {pluralYears(c.duration)} общения ({formatYr(c.from)} — {formatYr(c.to)})
+                        {c.duration} {pluralYears(c.duration)} возможного общения · с {formatYr(c.from)} по {formatYr(c.to)}
                       </div>
                     </div>
                   ))
