@@ -56,6 +56,20 @@ services:
       - app_network
     restart: unless-stopped
 
+  adminer:
+    image: adminer:latest
+    container_name: historical_map_adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: postgres
+      ADMINER_DESIGN: pepa-linha-dark
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    networks:
+      - app_network
+    restart: unless-stopped
+
   certbot:
     image: certbot/certbot
     container_name: historical_map_certbot

@@ -88,9 +88,10 @@ echo -e "\n${BOLD}[3/7] Настройка файрвола${NC}"
 ufw allow 22/tcp   >/dev/null 2>&1
 ufw allow 80/tcp   >/dev/null 2>&1
 ufw allow 443/tcp  >/dev/null 2>&1
+ufw allow 8080/tcp >/dev/null 2>&1
 ufw --force enable >/dev/null 2>&1
 
-log "Открыты порты: 22 (SSH), 80 (HTTP), 443 (HTTPS)"
+log "Открыты порты: 22 (SSH), 80 (HTTP), 443 (HTTPS), 8080 (Adminer)"
 
 # ══════════════════════════════════════════════════════════════
 # 4. ГЕНЕРАЦИЯ .env
