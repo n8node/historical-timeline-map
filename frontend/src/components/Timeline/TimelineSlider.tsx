@@ -270,7 +270,9 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
           ref={trackRef}
           className="relative h-3 rounded-full cursor-pointer select-none"
           style={{
-            background: `linear-gradient(to right, #8B4513 0%, #CD853F 15%, #4A5568 30%, #2D8659 45%, #2B6CB0 65%, #E53E3E 100%)`,
+            background: eras.length
+              ? `linear-gradient(to right, ${eras.map((e) => `${e.color} ${yearToPercent(e.start_year)}%, ${e.color} ${yearToPercent(e.end_year)}%`).join(', ')})`
+              : '#4A5568',
           }}
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
@@ -319,16 +321,17 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
           />
         </div>
 
-        {/* Row 5: Scale labels */}
-        <div className="flex justify-between mt-2 text-[10px] text-white/40">
-          <span>{formatYear(minYear)}</span>
-          <span>{formatYear(-3000)}</span>
-          <span>{formatYear(-500)}</span>
-          <span>0</span>
-          <span>{formatYear(500)}</span>
-          <span>{formatYear(1000)}</span>
-          <span>{formatYear(1500)}</span>
-          <span>{formatYear(2000)}</span>
+        {/* Row 5: Scale labels — positioned at actual year locations */}
+        <div className="relative h-4 mt-2">
+          {[minYear, -3000, -2000, -1000, -500, 0, 500, 1000, 1500, maxYear].map((y) => (
+            <span
+              key={y}
+              className="absolute text-[10px] text-white/40 -translate-x-1/2 whitespace-nowrap"
+              style={{ left: `${yearToPercent(y)}%` }}
+            >
+              {y === 0 ? '0' : formatYear(y)}
+            </span>
+          ))}
         </div>
       </div>
     </div>
