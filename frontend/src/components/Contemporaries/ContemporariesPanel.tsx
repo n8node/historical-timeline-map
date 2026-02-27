@@ -9,7 +9,7 @@ interface ContemporariesPanelProps {
 const ADULT_AGE = 20;
 
 const formatYr = (y: number): string =>
-  y < 0 ? `${Math.abs(y)} до н.э.` : `${y} н.э.`;
+  y < 0 ? `${Math.abs(y)} до н.э.` : `${y}`;
 
 interface AdultPerson {
   name: string;
@@ -161,7 +161,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                           >
                             <span className="text-white/70 truncate">{c.name}</span>
                             <span className="text-white/30 font-mono shrink-0 text-[10px]">
-                              {formatYr(c.from)}–{formatYr(c.to)} · {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'}
+                              {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'} общения ({formatYr(c.from)}–{formatYr(c.to)})
                             </span>
                           </div>
                         ))}
