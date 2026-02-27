@@ -130,7 +130,18 @@ const TimelineSlider: React.FC<TimelineSliderProps> = ({
   }, [personMarkers, yearToPercent]);
 
   const currentEra = useMemo(() => {
-    return eras.find((e) => year >= e.start_year && year <= e.end_year);
+    let best: Era | undefined;
+    let bestSpan = Infinity;
+    for (const e of eras) {
+      if (year >= e.start_year && year <= e.end_year) {
+        const span = e.end_year - e.start_year;
+        if (span < bestSpan) {
+          best = e;
+          bestSpan = span;
+        }
+      }
+    }
+    return best;
   }, [eras, year]);
 
   const currentPercent = yearToPercent(year);
