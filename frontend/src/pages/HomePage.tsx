@@ -69,7 +69,7 @@ const HomePage: React.FC = () => {
         personMarkers={personMarkers}
       />
       <ContemporariesPanel year={year} personMarkers={personMarkers} onPersonClick={handlePersonClick} />
-      <PersonCard personId={selectedPersonId} onClose={handleCloseCard} />
+      <PersonCard personId={selectedPersonId} onClose={handleCloseCard} personMarkers={personMarkers} onPersonClick={handlePersonClick} />
     </div>
   );
 };
