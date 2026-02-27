@@ -276,8 +276,16 @@ const PersonForm: React.FC = () => {
                 <option value="">—</option>
                 <option value="ruler">Правитель</option>
                 <option value="scientist">Учёный</option>
+                <option value="philosopher">Философ</option>
                 <option value="artist">Деятель искусств</option>
+                <option value="writer">Писатель / Поэт</option>
                 <option value="military">Военачальник</option>
+                <option value="politician">Политик / Оратор</option>
+                <option value="religious">Религиозный деятель</option>
+                <option value="engineer">Инженер / Архитектор</option>
+                <option value="doctor">Врач</option>
+                <option value="explorer">Путешественник</option>
+                <option value="athlete">Атлет</option>
               </select>
             </div>
           </div>
