@@ -146,10 +146,12 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                           className="text-[13px] font-semibold text-white truncate cursor-pointer hover:text-accent transition-colors"
                           onClick={(e) => { e.stopPropagation(); onPersonClick(person.id); }}
                         >{person.name}</span>
-                        <span
-                          className="text-[11px] text-white/40 font-mono shrink-0 cursor-help"
-                          title={`Возраст на ${formatYr(year)}`}
-                        >🎂 {person.age}</span>
+                        <span className="relative group text-[11px] text-white/40 font-mono shrink-0 cursor-help">
+                          🎂 {person.age}
+                          <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 px-2.5 py-1 rounded-md bg-black/90 backdrop-blur-sm text-[10px] text-white whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                            Возраст на {formatYr(year)}
+                          </span>
+                        </span>
                       </div>
                       <div className="text-[10px] text-white/30 mt-0.5">
                         {formatYr(person.birthYear)} — {formatYr(person.deathYear)}

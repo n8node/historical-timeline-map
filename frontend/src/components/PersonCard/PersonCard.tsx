@@ -7,6 +7,7 @@ interface PersonCardProps {
   onClose: () => void;
   personMarkers: PersonYearRange[];
   onPersonClick: (id: string) => void;
+  year: number;
 }
 
 const ADULT_AGE = 20;
@@ -29,12 +30,13 @@ const pluralYears = (n: number): string => {
 interface Contemporary {
   id: string;
   name: string;
+  birthYear: number;
   from: number;
   to: number;
   duration: number;
 }
 
-const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarkers, onPersonClick }) => {
+const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarkers, onPersonClick, year }) => {
   const [person, setPerson] = useState<Person | null>(null);
   const [loading, setLoading] = useState(false);
   const [activePhoto, setActivePhoto] = useState(0);
@@ -78,6 +80,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
         result.push({
           id: other.id,
           name: other.name,
+          birthYear: other.birth_year,
           from,
           to,
           duration: to - from,
@@ -241,9 +244,17 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
                         <span className="text-[13px] font-semibold text-white truncate hover:text-accent transition-colors">
                           {c.name}
                         </span>
-                        <span className="text-[11px] text-accent/70 font-mono shrink-0">
-                          {c.duration} {pluralYears(c.duration)}
-                        </span>
+                        <div className="flex items-baseline gap-2 shrink-0">
+                          <span className="relative group text-[11px] text-white/40 font-mono cursor-help">
+                            🎂 {year - c.birthYear}
+                            <span className="pointer-events-none absolute bottom-full right-0 mb-1.5 px-2.5 py-1 rounded-md bg-black/90 backdrop-blur-sm text-[10px] text-white whitespace-nowrap shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-150">
+                              Возраст на {formatYr(year)}
+                            </span>
+                          </span>
+                          <span className="text-[11px] text-accent/70 font-mono">
+                            {c.duration} {pluralYears(c.duration)}
+                          </span>
+                        </div>
                       </div>
                       <div className="text-[10px] text-white/30 mt-0.5">
                         общение: {formatYr(c.from)} — {formatYr(c.to)}
