@@ -45,9 +45,9 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
         for (const other of personMarkers) {
           if (other === p) continue;
           const otherAdultFrom = other.birth_year + ADULT_AGE;
-          if (adultFrom <= other.death_year && otherAdultFrom <= p.death_year) {
-            const from = Math.max(adultFrom, otherAdultFrom);
-            const to = Math.min(p.death_year, other.death_year);
+          const from = Math.max(adultFrom, otherAdultFrom);
+          const to = Math.min(p.death_year, other.death_year);
+          if (from < to) {
             contList.push({
               name: other.name,
               from,
@@ -161,7 +161,7 @@ const ContemporariesPanel: React.FC<ContemporariesPanelProps> = ({ year, personM
                           >
                             <span className="text-white/70 truncate">{c.name}</span>
                             <span className="text-white/30 font-mono shrink-0 text-[10px]">
-                              {c.duration > 0 ? `${c.duration} лет` : '<1 года'}
+                              {formatYr(c.from)}–{formatYr(c.to)} · {c.duration} {c.duration === 1 ? 'год' : c.duration < 5 ? 'года' : 'лет'}
                             </span>
                           </div>
                         ))}
