@@ -208,6 +208,18 @@ def find_image_for_person(name_ru: str, name_orig: str) -> Optional[str]:
         "Владимир Владимирович Маяковский": "Vladimir Mayakovsky",
         "Михаил Сергеевич Горбачёв": "Mikhail Gorbachev",
         "Жанна де Бар": "Jeanne de Bar",
+        "Владимир Владимирович Путин": "Vladimir Putin",
+        "Владимир Зеленский": "Volodymyr Zelenskyy",
+        "Алексей Навальный": "Alexei Navalny",
+        "Павел Дуров": "Pavel Durov",
+        "Григорий Перельман": "Grigori Perelman",
+        "Юрий Мильнер": "Yuri Milner",
+        "Виктор Пелевин": "Victor Pelevin",
+        "Людмила Улицкая": "Lyudmila Ulitskaya",
+        "Михаил Шемякин": "Mihail Shemyakin",
+        "Евгений Касперский": "Eugene Kaspersky",
+        "Андрей Звягинцев": "Andrey Zvyagintsev",
+        "Жорес Алфёров": "Zhores Alferov",
     }
 
     en_name = en_name_from_ru.get(name_ru)
