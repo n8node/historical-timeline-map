@@ -109,7 +109,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
 
       <div
-        className="relative w-full max-w-5xl max-h-[90vh] md:h-[75vh] overflow-hidden glass-panel-solid shadow-2xl animate-slide-up flex flex-col md:flex-row"
+        className="relative w-full max-w-5xl max-h-[85vh] overflow-hidden glass-panel-solid shadow-2xl animate-slide-up flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -133,41 +133,43 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
         ) : person ? (
           <>
             {/* Portrait photo column */}
-            <div className="relative shrink-0 w-full h-[280px] md:w-[240px] md:h-auto bg-primary-dark overflow-hidden md:rounded-l-xl">
-              <img
-                src={allPhotos[activePhoto] || ''}
-                alt={person.name}
-                className="w-full h-full object-cover object-top"
-                onError={(e) => {
-                  (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiMxYTFhMmUiLz48dGV4dCB4PSIxNTAiIHk9IjIwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSI0OCI+8J+RpDwvdGV4dD48L3N2Zz4=';
-                }}
-              />
+            <div className="shrink-0 w-full md:w-[240px] bg-primary-dark overflow-hidden md:rounded-l-xl">
+              <div className="relative w-full h-[280px] md:h-auto md:aspect-[3/4]">
+                <img
+                  src={allPhotos[activePhoto] || ''}
+                  alt={person.name}
+                  className="w-full h-full object-cover object-top"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiMxYTFhMmUiLz48dGV4dCB4PSIxNTAiIHk9IjIwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSI0OCI+8J+RpDwvdGV4dD48L3N2Zz4=';
+                  }}
+                />
 
-              {allPhotos.length > 1 && (
-                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                  {allPhotos.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setActivePhoto(i)}
-                      className={`w-2.5 h-2.5 rounded-full transition-all ${
-                        i === activePhoto
-                          ? 'bg-accent scale-110'
-                          : 'bg-white/40 hover:bg-white/60'
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
+                {allPhotos.length > 1 && (
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                    {allPhotos.map((_, i) => (
+                      <button
+                        key={i}
+                        onClick={() => setActivePhoto(i)}
+                        className={`w-2.5 h-2.5 rounded-full transition-all ${
+                          i === activePhoto
+                            ? 'bg-accent scale-110'
+                            : 'bg-white/40 hover:bg-white/60'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                )}
 
-              {person.era && (
-                <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-black/50 backdrop-blur-sm text-white/90">
-                  {person.era}
-                </div>
-              )}
+                {person.era && (
+                  <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-black/50 backdrop-blur-sm text-white/90">
+                    {person.era}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Info column */}
-            <div className="flex-1 overflow-y-auto max-h-[90vh] min-w-0">
+            <div className="flex-1 overflow-y-auto min-h-0 min-w-0">
               <div className="p-5 space-y-3">
                 <div>
                   <h2 className="font-display text-xl font-bold text-white leading-tight">
@@ -224,7 +226,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
             </div>
 
             {/* Contemporaries column */}
-            <div className="w-full md:w-[320px] shrink-0 md:border-l border-t md:border-t-0 border-white/10 flex flex-col overflow-hidden">
+            <div className="w-full md:w-[320px] shrink-0 md:border-l border-t md:border-t-0 border-white/10 flex flex-col overflow-hidden min-h-0">
               <div className="px-4 py-3 border-b border-white/10 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <span>👥</span> Современники
