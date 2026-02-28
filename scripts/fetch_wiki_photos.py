@@ -22,7 +22,7 @@ sys.stderr.reconfigure(encoding="utf-8", errors="replace")
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 UPLOAD_DIR = PROJECT_ROOT / "backend" / "uploads" / "seed"
 SQL_DIR = PROJECT_ROOT / "init-db"
-OUTPUT_SQL = SQL_DIR / "05-photo-updates.sql"
+OUTPUT_SQL = SQL_DIR / "07-photo-updates.sql"
 
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -47,7 +47,7 @@ def extract_persons_from_sql():
     )
 
     for sql_file in sql_files:
-        if sql_file.name == "05-photo-updates.sql":
+        if sql_file.name == "07-photo-updates.sql":
             continue
         content = sql_file.read_text(encoding="utf-8")
         for match in pattern.finditer(content):
