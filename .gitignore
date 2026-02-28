@@ -13,9 +13,10 @@ venv/
 node_modules/
 frontend/node_modules/
 
-# Uploads
+# Uploads (keep seed images in repo)
 backend/uploads/*
 !backend/uploads/.gitkeep
+!backend/uploads/seed/
 
 # IDE
 .vscode/
