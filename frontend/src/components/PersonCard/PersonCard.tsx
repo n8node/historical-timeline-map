@@ -121,96 +121,99 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
 
         {loading ? (
           <div className="p-8 space-y-4 w-full">
-            <div className="skeleton h-64 w-full rounded-t-xl" />
-            <div className="skeleton h-8 w-2/3" />
-            <div className="skeleton h-4 w-1/2" />
-            <div className="skeleton h-20 w-full" />
+            <div className="flex gap-4">
+              <div className="skeleton w-40 h-52 rounded-xl shrink-0" />
+              <div className="flex-1 space-y-3">
+                <div className="skeleton h-8 w-2/3" />
+                <div className="skeleton h-4 w-1/2" />
+                <div className="skeleton h-20 w-full" />
+              </div>
+            </div>
           </div>
         ) : person ? (
           <>
-            {/* Left column — person details */}
-            <div className="md:w-3/5 w-full overflow-y-auto max-h-[90vh]">
-              <div className="relative">
-                <div className="aspect-[16/10] overflow-hidden rounded-tl-xl bg-primary-dark">
-                  <img
-                    src={allPhotos[activePhoto] || ''}
-                    alt={person.name}
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDQwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIzMDAiIGZpbGw9IiMxYTFhMmUiLz48dGV4dCB4PSIyMDAiIHk9IjE1MCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSI0MCI+8J+RpDwvdGV4dD48L3N2Zz4=';
-                    }}
-                  />
+            {/* Portrait photo column */}
+            <div className="relative shrink-0 w-full h-[280px] md:w-[240px] md:h-auto bg-primary-dark overflow-hidden md:rounded-l-xl">
+              <img
+                src={allPhotos[activePhoto] || ''}
+                alt={person.name}
+                className="w-full h-full object-cover object-top"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjQwMCIgdmlld0JveD0iMCAwIDMwMCA0MDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjMwMCIgaGVpZ2h0PSI0MDAiIGZpbGw9IiMxYTFhMmUiLz48dGV4dCB4PSIxNTAiIHk9IjIwMCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzY2NiIgZm9udC1zaXplPSI0OCI+8J+RpDwvdGV4dD48L3N2Zz4=';
+                }}
+              />
+
+              {allPhotos.length > 1 && (
+                <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                  {allPhotos.map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActivePhoto(i)}
+                      className={`w-2.5 h-2.5 rounded-full transition-all ${
+                        i === activePhoto
+                          ? 'bg-accent scale-110'
+                          : 'bg-white/40 hover:bg-white/60'
+                      }`}
+                    />
+                  ))}
                 </div>
+              )}
 
-                {allPhotos.length > 1 && (
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-                    {allPhotos.map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setActivePhoto(i)}
-                        className={`w-2.5 h-2.5 rounded-full transition-all ${
-                          i === activePhoto
-                            ? 'bg-accent scale-110'
-                            : 'bg-white/40 hover:bg-white/60'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
+              {person.era && (
+                <div className="absolute top-3 left-3 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-black/50 backdrop-blur-sm text-white/90">
+                  {person.era}
+                </div>
+              )}
+            </div>
 
-                {person.era && (
-                  <div className="absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium bg-black/50 backdrop-blur-sm text-white/90">
-                    {person.era}
-                  </div>
-                )}
-              </div>
-
-              <div className="p-6 space-y-4">
+            {/* Info column */}
+            <div className="flex-1 overflow-y-auto max-h-[90vh] min-w-0">
+              <div className="p-5 space-y-3">
                 <div>
-                  <h2 className="font-display text-2xl font-bold text-white">
+                  <h2 className="font-display text-xl font-bold text-white leading-tight">
                     {person.name}
                   </h2>
                   {person.name_original && (
-                    <p className="text-sm text-white/40 mt-0.5">{person.name_original}</p>
+                    <p className="text-xs text-white/40 mt-0.5">{person.name_original}</p>
                   )}
                   {person.activity_description && (
-                    <p className="text-accent font-medium mt-1">{person.activity_description}</p>
+                    <p className="text-accent text-sm font-medium mt-1">{person.activity_description}</p>
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div className="flex items-start gap-2 text-sm">
-                    <span className="text-accent/80 mt-0.5">★</span>
+                <div className="flex flex-wrap gap-x-5 gap-y-1">
+                  <div className="flex items-start gap-1.5 text-sm">
+                    <span className="text-accent/80 mt-0.5 text-xs">★</span>
                     <div>
-                      <div className="text-white/90">
+                      <span className="text-white/90 text-xs">
                         {formatYear(person.birth_year, person.birth_year_approximate)}
-                      </div>
+                      </span>
                       {person.birth_place_name && (
-                        <div className="text-white/50 text-xs">{person.birth_place_name}</div>
+                        <span className="text-white/40 text-xs ml-1">{person.birth_place_name}</span>
                       )}
                     </div>
                   </div>
-                  <div className="flex items-start gap-2 text-sm">
-                    <span className="text-white/40 mt-0.5">†</span>
+                  <div className="flex items-start gap-1.5 text-sm">
+                    <span className="text-white/40 mt-0.5 text-xs">†</span>
                     <div>
-                      <div className="text-white/90">
+                      <span className="text-white/90 text-xs">
                         {formatYear(person.death_year, person.death_year_approximate)}
-                      </div>
+                      </span>
                       {person.death_place_name && (
-                        <div className="text-white/50 text-xs">{person.death_place_name}</div>
+                        <span className="text-white/40 text-xs ml-1">{person.death_place_name}</span>
                       )}
                     </div>
                   </div>
                 </div>
 
                 {person.short_bio && (
-                  <p className="text-white/70 text-sm leading-relaxed border-l-2 border-accent/30 pl-4">
+                  <p className="text-white/70 text-sm leading-relaxed border-l-2 border-accent/30 pl-3">
                     {person.short_bio}
                   </p>
                 )}
 
                 <div>
-                  <h3 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-2">
+                  <h3 className="text-xs font-semibold text-white/60 uppercase tracking-wider mb-1.5">
                     Биография
                   </h3>
                   <p className="text-white/80 text-sm leading-relaxed">
@@ -220,8 +223,8 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
               </div>
             </div>
 
-            {/* Right column — contemporaries */}
-            <div className="md:w-2/5 w-full md:border-l border-t md:border-t-0 border-white/10 flex flex-col overflow-hidden">
+            {/* Contemporaries column */}
+            <div className="w-full md:w-[320px] shrink-0 md:border-l border-t md:border-t-0 border-white/10 flex flex-col overflow-hidden">
               <div className="px-4 py-3 border-b border-white/10 shrink-0">
                 <h3 className="text-sm font-bold text-white flex items-center gap-2">
                   <span>👥</span> Современники
