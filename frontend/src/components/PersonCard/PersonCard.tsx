@@ -109,7 +109,7 @@ const PersonCard: React.FC<PersonCardProps> = ({ personId, onClose, personMarker
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-fade-in" />
 
       <div
-        className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden glass-panel-solid shadow-2xl animate-slide-up flex flex-col md:flex-row"
+        className="relative w-full max-w-5xl max-h-[90vh] md:h-[75vh] overflow-hidden glass-panel-solid shadow-2xl animate-slide-up flex flex-col md:flex-row"
         onClick={(e) => e.stopPropagation()}
       >
         <button
