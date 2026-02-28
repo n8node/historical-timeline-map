@@ -53,6 +53,22 @@ CREATE TABLE IF NOT EXISTS photo_gallery (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+-- Site settings (key-value)
+CREATE TABLE IF NOT EXISTS site_settings (
+    key VARCHAR(100) PRIMARY KEY,
+    value TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO site_settings (key, value) VALUES
+('welcome_image', '/uploads/seed/default.jpg'),
+('welcome_title', 'Historical Timeline Map'),
+('welcome_text', 'Интерактивная карта исторических личностей. Перемещайтесь во времени с помощью таймлайна, изучайте биографии и находите связи между современниками разных эпох.'),
+('welcome_btn1_text', 'Регистрация'),
+('welcome_btn1_url', '#'),
+('welcome_btn2_text', 'Подписаться'),
+('welcome_btn2_url', '#');
+
 -- Events table (future expansion)
 CREATE TABLE IF NOT EXISTS events (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),

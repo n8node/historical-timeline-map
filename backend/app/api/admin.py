@@ -1,7 +1,9 @@
 import math
 from uuid import UUID
+from typing import Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from pydantic import BaseModel
 from sqlalchemy import select, func, delete
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -10,12 +12,23 @@ from app.database import get_db
 from app.models.person import Person
 from app.models.photo import PhotoGallery
 from app.models.user import User
+from app.models.site_settings import SiteSettings
 from app.schemas import (
     PersonCreate, PersonUpdate, PersonResponse,
     PersonListResponse, PhotoGalleryCreate, StatsResponse,
 )
 from app.schemas.stats import EraCount
 from app.services.auth import get_current_user
+
+
+class WelcomeSettingsUpdate(BaseModel):
+    welcome_image: str | None = None
+    welcome_title: str | None = None
+    welcome_text: str | None = None
+    welcome_btn1_text: str | None = None
+    welcome_btn1_url: str | None = None
+    welcome_btn2_text: str | None = None
+    welcome_btn2_url: str | None = None
 
 router = APIRouter()
 
@@ -184,3 +197,39 @@ async def get_stats(
         by_era=[EraCount(era=row[0], count=row[1]) for row in era_rows],
         by_category=[EraCount(era=row[0], count=row[1]) for row in cat_rows],
     )
+
+
+@router.get("/settings/welcome", response_model=Dict[str, str])
+async def admin_get_welcome(
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(SiteSettings).where(SiteSettings.key.like("welcome_%"))
+    )
+    rows = result.scalars().all()
+    return {row.key: row.value for row in rows}
+
+
+@router.put("/settings/welcome", response_model=Dict[str, str])
+async def admin_update_welcome(
+    data: WelcomeSettingsUpdate,
+    db: AsyncSession = Depends(get_db),
+    _user: User = Depends(get_current_user),
+):
+    updates = {k: v for k, v in data.model_dump().items() if v is not None}
+    for key, value in updates.items():
+        result = await db.execute(
+            select(SiteSettings).where(SiteSettings.key == key)
+        )
+        row = result.scalar_one_or_none()
+        if row:
+            row.value = value
+        else:
+            db.add(SiteSettings(key=key, value=value))
+
+    result = await db.execute(
+        select(SiteSettings).where(SiteSettings.key.like("welcome_%"))
+    )
+    rows = result.scalars().all()
+    return {row.key: row.value for row in rows}

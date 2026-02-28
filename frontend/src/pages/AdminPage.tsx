@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Dashboard from '../components/Admin/Dashboard';
 import PersonList from '../components/Admin/PersonList';
 import PersonForm from '../components/Admin/PersonForm';
+import WelcomeEditor from '../components/Admin/WelcomeEditor';
 import Login from '../components/Admin/Login';
 
 const AdminLayout: React.FC = () => {
@@ -36,6 +37,9 @@ const AdminLayout: React.FC = () => {
           <NavLink to="/admin/persons" active={isActive('/admin/persons')}>
             👥 Персоны
           </NavLink>
+          <NavLink to="/admin/welcome" active={isActive('/admin/welcome')}>
+            💬 Приветствие
+          </NavLink>
           <NavLink to="/" active={false}>
             🗺 Открыть карту
           </NavLink>
@@ -59,6 +63,7 @@ const AdminLayout: React.FC = () => {
             <Route path="persons" element={<PersonList />} />
             <Route path="persons/new" element={<PersonForm />} />
             <Route path="persons/:id" element={<PersonForm />} />
+            <Route path="welcome" element={<WelcomeEditor />} />
           </Routes>
         </div>
       </main>

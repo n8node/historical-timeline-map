@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type {
-  PersonMap, Person, PersonListResponse, Era, PersonYearRange, Stats, TokenResponse,
+  PersonMap, Person, PersonListResponse, Era, PersonYearRange, Stats, TokenResponse, WelcomeSettings,
 } from '../types';
 
 const API_BASE = process.env.REACT_APP_API_URL || '/api';
@@ -41,6 +41,9 @@ export const getEras = () =>
 
 export const getPersonMarkers = () =>
   api.get<PersonYearRange[]>('/timeline/person-markers').then((r) => r.data);
+
+export const getWelcomeSettings = () =>
+  api.get<WelcomeSettings>('/settings/welcome').then((r) => r.data);
 
 // ── Auth ──
 
@@ -96,6 +99,14 @@ export const uploadImage = async (file: File): Promise<string> => {
   });
   return res.data.url;
 };
+
+// ── Admin Settings ──
+
+export const adminGetWelcome = () =>
+  api.get<WelcomeSettings>('/admin/settings/welcome').then((r) => r.data);
+
+export const adminUpdateWelcome = (data: Partial<WelcomeSettings>) =>
+  api.put<WelcomeSettings>('/admin/settings/welcome', data).then((r) => r.data);
 
 // ── Stats ──
 

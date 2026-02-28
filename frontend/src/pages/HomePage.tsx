@@ -4,6 +4,7 @@ import TimelineSlider from '../components/Timeline/TimelineSlider';
 import PersonCard from '../components/PersonCard/PersonCard';
 import Header from '../components/Layout/Header';
 import ContemporariesPanel from '../components/Contemporaries/ContemporariesPanel';
+import WelcomePopup from '../components/Welcome/WelcomePopup';
 import { getPersonsByYear, getEras, getPersonMarkers } from '../services/api';
 import type { PersonMap, Era, PersonYearRange } from '../types';
 
@@ -15,6 +16,7 @@ const HomePage: React.FC = () => {
   const [selectedPersonId, setSelectedPersonId] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [lightMap, setLightMap] = useState(true);
+  const [showWelcome, setShowWelcome] = useState(() => !localStorage.getItem('welcome_seen'));
 
   useEffect(() => {
     getEras().then(setEras).catch(() => {});
@@ -57,7 +59,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="relative w-full h-full overflow-hidden">
-      <Header personCount={persons.length} lightMap={lightMap} />
+      <Header personCount={persons.length} lightMap={lightMap} onGearClick={() => setShowWelcome(true)} />
       <MapView
         persons={persons}
         onPersonClick={handlePersonClick}
@@ -72,6 +74,7 @@ const HomePage: React.FC = () => {
       />
       <ContemporariesPanel year={year} personMarkers={personMarkers} onPersonClick={handlePersonClick} lightMap={lightMap} />
       <PersonCard personId={selectedPersonId} onClose={handleCloseCard} personMarkers={personMarkers} onPersonClick={handlePersonClick} year={year} />
+      <WelcomePopup open={showWelcome} onClose={() => setShowWelcome(false)} />
     </div>
   );
 };

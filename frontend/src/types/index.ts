@@ -79,6 +79,16 @@ export interface Stats {
   by_category: EraCount[];
 }
 
+export interface WelcomeSettings {
+  welcome_image: string;
+  welcome_title: string;
+  welcome_text: string;
+  welcome_btn1_text: string;
+  welcome_btn1_url: string;
+  welcome_btn2_text: string;
+  welcome_btn2_url: string;
+}
+
 export interface LoginRequest {
   email: string;
   password: string;

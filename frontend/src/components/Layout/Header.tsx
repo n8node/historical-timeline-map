@@ -4,9 +4,10 @@ import { Link, useLocation } from 'react-router-dom';
 interface HeaderProps {
   personCount: number;
   lightMap?: boolean;
+  onGearClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ personCount, lightMap = false }) => {
+const Header: React.FC<HeaderProps> = ({ personCount, lightMap = false, onGearClick }) => {
   const location = useLocation();
   const isAdmin = location.pathname.startsWith('/admin');
 
@@ -37,12 +38,15 @@ const Header: React.FC<HeaderProps> = ({ personCount, lightMap = false }) => {
               {personCount === 1 ? 'персона' : personCount < 5 ? 'персоны' : 'персон'} на карте
             </div>
           )}
-          <Link
-            to={isAdmin ? '/' : '/admin'}
-            className={`${panel} px-4 py-2.5 text-sm font-medium text-white/70 hover:text-white hover:bg-white/[0.12] transition-all`}
-          >
-            {isAdmin ? '← Карта' : 'Админ-панель'}
-          </Link>
+          {!isAdmin && onGearClick && (
+            <button
+              onClick={onGearClick}
+              className={`${panel} w-10 h-10 flex items-center justify-center text-white/50 hover:text-white hover:bg-white/[0.12] transition-all text-lg`}
+              title="О проекте"
+            >
+              ⚙
+            </button>
+          )}
         </div>
       </div>
     </header>

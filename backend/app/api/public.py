@@ -1,4 +1,5 @@
 from uuid import UUID
+from typing import Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func
@@ -7,6 +8,7 @@ from sqlalchemy.orm import selectinload
 
 from app.database import get_db
 from app.models.person import Person
+from app.models.site_settings import SiteSettings
 from app.schemas import PersonResponse, PersonMapResponse, PersonYearRangeResponse, EraResponse
 
 router = APIRouter()
@@ -70,3 +72,13 @@ async def get_person_markers(db: AsyncSession = Depends(get_db)):
         .order_by(Person.birth_year)
     )
     return result.scalars().all()
+
+
+@router.get("/settings/welcome", response_model=Dict[str, str])
+async def get_welcome_settings(db: AsyncSession = Depends(get_db)):
+    """Return welcome popup settings."""
+    result = await db.execute(
+        select(SiteSettings).where(SiteSettings.key.like("welcome_%"))
+    )
+    rows = result.scalars().all()
+    return {row.key: row.value for row in rows}
